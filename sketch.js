@@ -139,24 +139,57 @@ function checkWin(circleTurn){
   if(ascWin) return true;
 }
 
+function isAvail(i, j){
+  return board[i][j] == '';
+}
+
+function aiMove(){
+  for(let i=0; i<3; i++){
+    for(let j=0; j<3; j++){
+      if(isAvail(i,j)) return [i,j];
+    }
+  }
+}
+
 function mouseClicked(){
   if (!gameOver){
-    let row = int(mouseX/(HEIGHT/3));
-    let col = int(mouseY/(HEIGHT/3));
+    let row =0, col = 0;
+      row = int(mouseX/(HEIGHT/3));
+      col = int(mouseY/(HEIGHT/3));
     if(board[row][col] == ''){
-      if(circleTurn){
-        board[row][col] = 'o';
-      } else {
-        board[row][col] = 'x';
+        if(circleTurn){
+          board[row][col] = 'o';
+        } else {
+          board[row][col] = 'x';
+        }
+        if(checkWin(circleTurn)){
+          gameOver = true;
+        }
+        if(checkWin(!circleTurn)){
+          gameOver = true;
+        }
+        circleTurn = !circleTurn;
+        if(!gameOver){
+          let result = aiMove();
+          row = result[0];
+          col = result[1];
+          if(board[row][col] == ''){
+            if(circleTurn){
+              board[row][col] = 'o';
+            } else {
+              board[row][col] = 'x';
+            }
+            if(checkWin(circleTurn)){
+              gameOver = true;
+            }
+            if(checkWin(!circleTurn)){
+              gameOver = true;
+            }
+        }
+        circleTurn = !circleTurn;
       }
-      if(checkWin(circleTurn)){
-        gameOver = true;
-      }
-      if(checkWin(!circleTurn)){
-        gameOver = true;
-      }
-      circleTurn = !circleTurn;
     }
+    
   }
 }
 
