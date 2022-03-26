@@ -21,14 +21,22 @@ let space = 30
 
 let gameOver = false;
 
+let useAI = true;
+let mxDepth = 20;
+
 function setup() {
-  createCanvas(HEIGHT, WIDTH);
+  createCanvas(HEIGHT, WIDTH + 100);
   resetSketch();
   // createCanvas(400, 400);
 }
 
 function resetSketch(){
   board = [
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', ''],
+  ];
+  boardC = [
     ['', '', ''],
     ['', '', ''],
     ['', '', ''],
@@ -44,7 +52,9 @@ function resetSketch(){
 
 function draw() {
   background(255);
-  
+  textSize(32);
+  text('somewhat smart bot', WIDTH/7, HEIGHT + 50); 
+  fill(0, 102, 153);
   let w = WIDTH / 3;
   let h = HEIGHT / 3;
   
@@ -96,7 +106,7 @@ function draw() {
   
 }
 
-function checkWin(circleTurn){
+function checkWin(circleTurn, toDraw){
   let val = 'o';
   if(!circleTurn) val = 'x';
   for(let i=0; i<3; i++){
@@ -105,7 +115,7 @@ function checkWin(circleTurn){
       win &= (board[i][j] == board[i][j-1] && board[i][j] == val);
     }
     if(win){
-      winVert[i] = 1;
+      if(toDraw) winVert[i] = 1;
       return true;
     }
   }
@@ -115,7 +125,7 @@ function checkWin(circleTurn){
       win &= (board[j][i] == board[j-1][i] && board[j][i] == val);
     }
     if(win){
-      winHorz[i] = 1;
+      if(toDraw) winHorz[i] = 1;
       return true;
     }
   }
@@ -125,7 +135,7 @@ function checkWin(circleTurn){
     dscWin &= (board[i][i] == board[i-1][i-1] && board[i][i] == val);
   }
   
-  winDsc |= dscWin;
+  if(toDraw) winDsc |= dscWin;
   
   if(dscWin) return true;
   
@@ -134,21 +144,94 @@ function checkWin(circleTurn){
     ascWin &= (board[i][3-i-1] == board[i-1][3-i] && board[i][3-i-1] == val);
   }
   
-  winAsc |= ascWin;
+  if(toDraw) winAsc |= ascWin;
   
   if(ascWin) return true;
 }
 
-function isAvail(i, j){
+function isAvail(i, j, copy){
+  if(copy) return boardC[i][j] == '';
   return board[i][j] == '';
 }
 
-function aiMove(){
+function minMax(player){
+  let moves = [];
   for(let i=0; i<3; i++){
     for(let j=0; j<3; j++){
-      if(isAvail(i,j)) return [i,j];
+      if(isAvail(i,j, true)){
+        moves.push([i,j]);
+      }
     }
   }
+  let best =1e9, bestInd = 0;
+  print("NEW");
+  for(let i=0; i<moves.length; i++){
+    boardC[moves[i][0]][moves[i][1]] = 'o';
+    let cur = chooseBest(!player, 0);
+    print(moves[i][0], moves[i][1], cur);
+    if(best >= cur){
+      best = cur;
+      bestInd = i;
+    }
+    boardC[moves[i][0]][moves[i][1]] = '';
+  }
+  return moves[bestInd];
+}
+
+function chooseBest(player, depth){
+  if(checkWin(!player, false)){
+    return -10 - depth;
+  }
+  if(checkWin(player, false)){
+    return 10 - depth;
+  }
+  if(isDraw()) return 0;
+  let moves = [];
+  for(let i=0; i<3; i++){
+    for(let j=0; j<3; j++){
+      if(isAvail(i,j,true)){
+        moves.push([i,j]);
+      }
+    }
+  }
+  let best = 0;
+  for(let i=0; i<moves.length; i++){
+    if(player){
+      boardC[moves[i][0]][moves[i][1]] = 'o';
+    } else {
+      boardC[moves[i][0]][moves[i][1]] = 'x';
+    }
+    best += chooseBest(!player, depth+1);
+    boardC[moves[i][0]][moves[i][1]] = '';
+  }
+  return -best;
+}
+
+function aiMove(){
+  if(!useAI){
+    let moves = [];
+    for(let i=0; i<3; i++){
+      for(let j=0; j<3; j++){
+        if(isAvail(i,j, false)) {
+          moves.push([i, j]);
+        }
+      }
+    }
+    return random(moves);
+  } else {
+    boardC = board;
+    return minMax(1);
+  }
+}
+
+function isDraw(){
+  let free = false;
+  for(let i=0; i<3; i++){
+    for(let j=0; j<3; j++){
+      free |= board[i][j] == '';
+    }
+  }
+  return !free;
 }
 
 function mouseClicked(){
@@ -162,14 +245,14 @@ function mouseClicked(){
         } else {
           board[row][col] = 'x';
         }
-        if(checkWin(circleTurn)){
+        if(checkWin(circleTurn, true)){
           gameOver = true;
         }
-        if(checkWin(!circleTurn)){
+        if(checkWin(!circleTurn, true)){
           gameOver = true;
         }
         circleTurn = !circleTurn;
-        if(!gameOver){
+        if(!gameOver && !isDraw()){
           let result = aiMove();
           row = result[0];
           col = result[1];
@@ -179,10 +262,10 @@ function mouseClicked(){
             } else {
               board[row][col] = 'x';
             }
-            if(checkWin(circleTurn)){
+            if(checkWin(circleTurn, true)){
               gameOver = true;
             }
-            if(checkWin(!circleTurn)){
+            if(checkWin(!circleTurn, true)){
               gameOver = true;
             }
         }
