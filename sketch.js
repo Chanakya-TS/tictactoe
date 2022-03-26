@@ -53,7 +53,7 @@ function resetSketch(){
 function draw() {
   background(255);
   textSize(32);
-  text('somewhat smart bot', WIDTH/7, HEIGHT + 50); 
+  text('smorty pants', WIDTH/3.5, HEIGHT + 50); 
   fill(0, 102, 153);
   let w = WIDTH / 3;
   let h = HEIGHT / 3;
@@ -194,14 +194,14 @@ function chooseBest(player, depth){
       }
     }
   }
-  let best = 0;
+  let best = 1e9;
   for(let i=0; i<moves.length; i++){
     if(player){
       boardC[moves[i][0]][moves[i][1]] = 'o';
     } else {
       boardC[moves[i][0]][moves[i][1]] = 'x';
     }
-    best += chooseBest(!player, depth+1);
+    best = min(best, chooseBest(!player, depth+1));
     boardC[moves[i][0]][moves[i][1]] = '';
   }
   return -best;
