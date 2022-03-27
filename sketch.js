@@ -1,5 +1,7 @@
-let HEIGHT = 400;
+let HEIGHT = 600;
 let WIDTH = HEIGHT;
+let OFFSET_H = 0;
+let OFFSET_W = 0;
 
 let board = [
   ['', '', ''],
@@ -24,10 +26,34 @@ let gameOver = false;
 let useAI = true;
 let mxDepth = 20;
 
+let title;
+let pressR;
+
+
+function centerCanvas(){
+  HEIGHT = 400;
+  WIDTH = HEIGHT;
+  resizeCanvas(WIDTH, HEIGHT * 1.5);
+  cnv.position((windowWidth - WIDTH) / 2, (windowHeight - HEIGHT)/2);
+  title.style('font-size', '32px');
+  title.style('text-align', 'center');
+  title.style('padding-top', '50px');
+  title.style('padding-bottom', '20px');
+  title.style('font-family', 'Arial, Helvetica, sans-serif');
+  pressR.style('text-align', 'center');
+  pressR.style('font-family', 'Arial, Helvetica, sans-serif');
+}
+
 function setup() {
-  createCanvas(HEIGHT, WIDTH + 100);
+  title = createDiv("Tic Tac Toe Bot");
+  pressR = createDiv("Press 'r' to restart");
+  cnv = createCanvas(WIDTH, HEIGHT * 1.5);
+  centerCanvas();
   resetSketch();
-  // createCanvas(400, 400);
+}
+
+function windowResized(){
+  centerCanvas();
 }
 
 function resetSketch(){
@@ -52,11 +78,12 @@ function resetSketch(){
 
 function draw() {
   background(255);
-  textSize(32);
-  text('smorty pants', WIDTH/3.5, HEIGHT + 50); 
-  fill(0, 102, 153);
+  textSize(20);
+  fill(0, 0, 0);
+  text('MinMax Algorithm (Smart Boi)', space * 2 , HEIGHT * 1.07);
+  text('Random (2 year old Boi)', space * 2 , HEIGHT * 1.2);
   let w = WIDTH / 3;
-  let h = HEIGHT / 3;
+  let h =  HEIGHT / 3;
   
   for(let i=1; i<3; i++){
     line(w*i, 0 + space/2, w*i, HEIGHT - space/2);
@@ -103,7 +130,18 @@ function draw() {
   }
   
   if(newGame) resetSketch();
-  
+  if(useAI){
+    fill(0, 0, 0);
+  } else {
+    noFill();
+  }
+  ellipse(space, HEIGHT * 1.05, 30, 30);
+  if(useAI){
+    noFill();
+  } else {
+    fill(0, 0, 0);
+  }
+  ellipse(space, HEIGHT * 1.2, 30, 30);
 }
 
 function checkWin(circleTurn, toDraw){
@@ -164,11 +202,9 @@ function minMax(player){
     }
   }
   let best =1e9, bestInd = 0;
-  print("NEW");
   for(let i=0; i<moves.length; i++){
     boardC[moves[i][0]][moves[i][1]] = 'o';
     let cur = chooseBest(!player, 0);
-    print(moves[i][0], moves[i][1], cur);
     if(best >= cur){
       best = cur;
       bestInd = i;
@@ -235,7 +271,14 @@ function isDraw(){
 }
 
 function mouseClicked(){
-  if (!gameOver){
+space, HEIGHT * 1.05
+  if(abs(mouseX - space) <= 30 && abs(mouseY - HEIGHT * 1.05) <= 30){
+    useAI = true;
+  } 
+  else if(abs(mouseX - space) <= 30 && abs(mouseY - HEIGHT * 1.2) <= 30){
+    useAI = false;
+  }
+  else if (!gameOver){
     let row =0, col = 0;
       row = int(mouseX/(HEIGHT/3));
       col = int(mouseY/(HEIGHT/3));

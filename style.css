@@ -1,7 +1,9 @@
 html, body {
+  align-self: center;
   margin: 0;
   padding: 0;
 }
 canvas {
+  align-self: center;
   display: block;
 }
