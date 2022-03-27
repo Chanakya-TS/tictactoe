@@ -17,6 +17,8 @@ let winDsc = false;
 let player1 = 'o';
 let player2 = 'x';
 
+let tf = [1, 0];
+
 let circleTurn = false;
 
 let space = 30
@@ -71,7 +73,26 @@ function resetSketch(){
   winVert = [0, 0, 0];
   winAsc = false;
   winDsc = false;
-  circleTurn = false;
+  circleTurn = random([0, 1]);
+  if(circleTurn){
+    let result = aiMove();
+    row = result[0];
+    col = result[1];
+    if(board[row][col] == ''){
+      if(circleTurn){
+        board[row][col] = 'o';
+      } else {
+        board[row][col] = 'x';
+      }
+      if(checkWin(circleTurn, true)){
+        gameOver = true;
+      }
+      if(checkWin(!circleTurn, true)){
+        gameOver = true;
+      }
+      circleTurn = !circleTurn;
+  }
+}
   gameOver = false;
   newGame = false;
 }
